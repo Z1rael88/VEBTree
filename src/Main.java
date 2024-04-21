@@ -56,20 +56,20 @@ class Main {
 
     // Function to return the minimum value
     // from the tree if it exists
-    public static int VEB_minimum(Van_Emde_Boas helper)
+    public static int FindMinimum(Van_Emde_Boas helper)
     {
         return (helper.minimum == -1 ? -1 : helper.minimum);
     }
 
     // Function to return the maximum value
     // from the tree if it exists
-    public static int VEB_maximum(Van_Emde_Boas helper)
+    public static int FindMaximum(Van_Emde_Boas helper)
     {
         return (helper.maximum == -1 ? -1 : helper.maximum);
     }
 
     // Function to insert a key in the tree
-    static void insert(Van_Emde_Boas helper, int key)
+    static void Insert(Van_Emde_Boas helper, int key)
     {
 
         // If no key is present in the tree
@@ -96,8 +96,8 @@ class Main {
 
                 // If no key is present in the cluster then
                 // insert key into both cluster and summary
-                if (VEB_minimum(helper.clusters.get(helper.high(key))) == -1) {
-                    insert(helper.summary, helper.high(key));
+                if (FindMinimum(helper.clusters.get(helper.high(key))) == -1) {
+                    Insert(helper.summary, helper.high(key));
 
                     // Sets the minimum and maximum of
                     // cluster to the key as no other keys
@@ -115,7 +115,7 @@ class Main {
                     // tree then recursively go deeper into
                     // the structure to set attributes
                     // accordingly
-                    insert(helper.clusters.get(helper.high(key)), helper.low(key));
+                    Insert(helper.clusters.get(helper.high(key)), helper.low(key));
                 }
             }
             // Sets the key as maximum it is greater than
@@ -127,7 +127,7 @@ class Main {
     }
     // Function that returns true if the
     // key is present in the tree
-    public static boolean isMember(Van_Emde_Boas helper,
+    public static boolean IsMember(Van_Emde_Boas helper,
                                    int key)
     {
         if (helper.universe_size < key) {
@@ -145,13 +145,13 @@ class Main {
                 return false;
             }
             else {
-                return isMember(helper.clusters.get(helper.high(key)), helper.low(key));
+                return IsMember(helper.clusters.get(helper.high(key)), helper.low(key));
             }
         }
     }
 
     // Function to find the successor of the given key
-    public static int VEB_successor(Van_Emde_Boas helper,
+    public static int FindSuccessor(Van_Emde_Boas helper,
                                     int key)
     {
         if (helper.universe_size == 2) {
@@ -171,7 +171,7 @@ class Main {
 
             // Find successor inside the cluster of the key
             // First find the maximum in the cluster
-            int max_incluster = VEB_maximum(helper.clusters.get(helper.high(key)));
+            int max_incluster = FindMaximum(helper.clusters.get(helper.high(key)));
             int offset;
             int succ_cluster;
 
@@ -180,26 +180,26 @@ class Main {
             // the cluster
             if (max_incluster != -1 && helper.low(key) < max_incluster)
             {
-                offset = VEB_successor(helper.clusters.get(helper.high(key)), helper.low(key));
+                offset = FindSuccessor(helper.clusters.get(helper.high(key)), helper.low(key));
 
                 return helper.generate_index(helper.high(key), offset);
             }
             else {
-                succ_cluster = VEB_successor(helper.summary, helper.high(key));
+                succ_cluster = FindSuccessor(helper.summary, helper.high(key));
                 if (succ_cluster == -1) {
                     return -1;
                 }
                 // Find minimum in successor cluster which
                 // will be the successor of the key
                 else {
-                    offset = VEB_minimum(helper.clusters.get(succ_cluster));
+                    offset = FindMinimum(helper.clusters.get(succ_cluster));
 
                     return helper.generate_index(succ_cluster, offset);
                 }
             }
         }
     }
-    public static int VEB_predecessor(Van_Emde_Boas helper, int key)
+    public static int FindPredecessor(Van_Emde_Boas helper, int key)
     {
         if (helper.universe_size == 2) {
             if (key == 1 && helper.minimum == 0) {
@@ -220,7 +220,7 @@ class Main {
             // Find predecessor in the cluster of the key
             // First find minimum in the key to check
             // whether any key is present in the cluster
-            int min_incluster = VEB_minimum(helper.clusters.get(helper.high(key)));
+            int min_incluster =FindMinimum(helper.clusters.get(helper.high(key)));
             int offset;
             int pred_cluster;
 
@@ -229,14 +229,14 @@ class Main {
             if (min_incluster != -1
                     && helper.low(key) > min_incluster) {
 
-                offset = VEB_predecessor(helper.clusters.get(helper.high(key)), helper.low(key));
+                offset = FindPredecessor(helper.clusters.get(helper.high(key)), helper.low(key));
 
                 return helper.generate_index(helper.high(key), offset);
             }
             else {
                 // returns the index of predecessor cluster
                 // with any key present
-                pred_cluster = VEB_predecessor(helper.summary, helper.high(key));
+                pred_cluster = FindPredecessor(helper.summary, helper.high(key));
                 // If no predecessor cluster then...
                 if (pred_cluster == -1) {
                     if (helper.minimum != -1 && key > helper.minimum) {
@@ -248,14 +248,14 @@ class Main {
                 } // Otherwise find maximum in the
                 // predecessor cluster
                 else {
-                    offset = VEB_maximum(helper.clusters.get(pred_cluster));
+                    offset = FindMaximum(helper.clusters.get(pred_cluster));
 
                     return helper.generate_index(pred_cluster, offset);
                 }
             }
         }
     }
-    public static void VEB_delete(Van_Emde_Boas helper, int key)
+    public static void Delete(Van_Emde_Boas helper, int key)
     {
         // If only one key is present, it means
         // that it is the key we want to delete
@@ -284,27 +284,27 @@ class Main {
             // bigger key and assign it as minimum
             if (key == helper.minimum) {
 
-                int first_cluster = VEB_minimum(helper.summary);
+                int first_cluster = FindMinimum(helper.summary);
 
-                key = helper.generate_index(first_cluster, VEB_minimum(helper.clusters.get(first_cluster)));
+                key = helper.generate_index(first_cluster, FindMinimum(helper.clusters.get(first_cluster)));
                 helper.minimum = key;
             }
 
             // Now we delete the key
-            VEB_delete(helper.clusters.get(helper.high(key)), helper.low(key));
+            Delete(helper.clusters.get(helper.high(key)), helper.low(key));
 
             // If the minimum in the cluster of the key is
             // -1 then we have to delete it from the summary
             // to eliminate the key completely
-            if (VEB_minimum(
+            if (FindMinimum(
                     helper.clusters.get(helper.high(key))) == -1) {
 
-                VEB_delete(helper.summary, helper.high(key));
+                Delete(helper.summary, helper.high(key));
 
                 // After the above condition, if the key
                 // is maximum of the tree then.
                 if (key == helper.maximum) {
-                    int max_insummary = VEB_maximum(helper.summary);
+                    int max_insummary = FindMaximum(helper.summary);
 
                     if (max_insummary == -1) {
                         helper.maximum = helper.minimum;
@@ -313,7 +313,7 @@ class Main {
                         // Assign global maximum of the
                         // tree, after deleting our
                         // query-key
-                        helper.maximum = helper.generate_index(max_insummary, VEB_maximum(helper.clusters.get(max_insummary)));
+                        helper.maximum = helper.generate_index(max_insummary, FindMaximum(helper.clusters.get(max_insummary)));
                     }
                 }
             }
@@ -321,11 +321,11 @@ class Main {
             // set the maximum of the tree
             // to the new maximum
             else if (key == helper.maximum) {
-                helper.maximum = helper.generate_index(helper.high(key), VEB_maximum(helper.clusters.get(helper.high(key))));
+                helper.maximum = helper.generate_index(helper.high(key), FindMaximum(helper.clusters.get(helper.high(key))));
             }
         }
     }
-    public static void displayMenu() {
+    public static void DisplayMenu() {
         System.out.println("Van Emde Boas Tree Operations:");
         System.out.println("1. Insert a key");
         System.out.println("2. Delete a key");
@@ -339,11 +339,11 @@ class Main {
     public static void main(String[] args)
     {
         Scanner scanner = new Scanner(System.in);
-        Van_Emde_Boas end = new Van_Emde_Boas(16);
+        Van_Emde_Boas tree = new Van_Emde_Boas(16);
 
         int choice;
         do {
-            displayMenu();
+            DisplayMenu();
             choice = scanner.nextInt();
             int key;
 
@@ -351,13 +351,13 @@ class Main {
                 case 1:
                     System.out.println("Enter key to insert:");
                     key = scanner.nextInt();
-                    insert(end, key);
+                    Insert(tree, key);
                     break;
                 case 2:
                     System.out.println("Enter key to delete:");
                     key = scanner.nextInt();
-                    if (isMember(end, key)) {
-                        VEB_delete(end, key);
+                    if (IsMember(tree, key)) {
+                        Delete(tree, key);
                         System.out.println("Key deleted successfully.");
                     } else {
                         System.out.println("Key not found.");
@@ -366,7 +366,7 @@ class Main {
                 case 3:
                     System.out.println("Enter key to check:");
                     key = scanner.nextInt();
-                    if (isMember(end, key)) {
+                    if (IsMember(tree, key)) {
                         System.out.println("Key exists.");
                     } else {
                         System.out.println("Key does not exist.");
@@ -375,7 +375,7 @@ class Main {
                 case 4:
                     System.out.println("Enter key to find predecessor:");
                     key = scanner.nextInt();
-                    int predecessor = VEB_predecessor(end, key);
+                    int predecessor = FindPredecessor(tree, key);
                     if (predecessor != -1) {
                         System.out.println("Predecessor of " + key + " is " + predecessor);
                     } else {
@@ -385,7 +385,7 @@ class Main {
                 case 5:
                     System.out.println("Enter key to find successor:");
                     key = scanner.nextInt();
-                    int successor = VEB_successor(end, key);
+                    int successor = FindSuccessor(tree, key);
                     if (successor != -1) {
                         System.out.println("Successor of " + key + " is " + successor);
                     } else {
