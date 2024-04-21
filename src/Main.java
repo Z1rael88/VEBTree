@@ -54,220 +54,28 @@ class Van_Emde_Boas {
 
 class Main {
 
-    // Function to return the minimum value
-    // from the tree if it exists
+    // Funkcja zwracająca minimalną wartość z drzewa, jeśli istnieje
     public static int FindMinimum(Van_Emde_Boas helper)
     {
         return (helper.minimum == -1 ? -1 : helper.minimum);
     }
 
-    // Function to return the maximum value
-    // from the tree if it exists
+    // Funkcja zwracająca maksymalną wartość z drzewa, jeśli istnieje
     public static int FindMaximum(Van_Emde_Boas helper)
     {
         return (helper.maximum == -1 ? -1 : helper.maximum);
     }
-
-    // Function to insert a key in the tree
-    static void Insert(Van_Emde_Boas helper, int key)
-    {
-
-        // If no key is present in the tree
-        // then set both minimum and maximum
-        // to the key (Read the previous article
-        // for more understanding about it)
-        if (helper.minimum == -1) {
-            helper.minimum = key;
-            helper.maximum = key;
-        }
-        else {
-            // If the key is less than the current minimum
-            // then swap it with the current minimum
-            // because this minimum is actually
-            // minimum of one of the internal cluster
-            if (key < helper.minimum) {
-                int temp = helper.minimum;
-                helper.minimum = key;
-                key = temp;
-            }
-
-            // Not base case then...
-            if (helper.universe_size > 2) {
-
-                // If no key is present in the cluster then
-                // insert key into both cluster and summary
-                if (FindMinimum(helper.clusters.get(helper.high(key))) == -1) {
-                    Insert(helper.summary, helper.high(key));
-
-                    // Sets the minimum and maximum of
-                    // cluster to the key as no other keys
-                    // are present we will stop at this
-                    // level
-                    helper.clusters.get(helper.high(key))
-                            .minimum
-                            = helper.low(key);
-                    helper.clusters.get(helper.high(key))
-                            .maximum
-                            = helper.low(key);
-                }
-                else {
-                    // If there are other elements in the
-                    // tree then recursively go deeper into
-                    // the structure to set attributes
-                    // accordingly
-                    Insert(helper.clusters.get(helper.high(key)), helper.low(key));
-                }
-            }
-            // Sets the key as maximum it is greater than
-            // current maximum
-            if (key > helper.maximum) {
-                helper.maximum = key;
-            }
-        }
-    }
-    // Function that returns true if the
-    // key is present in the tree
-    public static boolean IsMember(Van_Emde_Boas helper,
-                                   int key)
-    {
-        if (helper.universe_size < key) {
-            return false;
-        }
-
-        if (helper.minimum == key || helper.maximum == key) {
-            return true;
-        }
-        else {
-            // If after attending above condition,if the
-            // size of the tree is 2 then the present key
-            // must be maximum or minimum of the tree
-            if (helper.universe_size == 2) {
-                return false;
-            }
-            else {
-                return IsMember(helper.clusters.get(helper.high(key)), helper.low(key));
-            }
-        }
-    }
-
-    // Function to find the successor of the given key
-    public static int FindSuccessor(Van_Emde_Boas helper,
-                                    int key)
-    {
-        if (helper.universe_size == 2) {
-            if (key == 0 && helper.maximum == 1) {
-                return 1;
-            }
-            else {
-                return -1;
-            }
-        }
-        // If key is less than minimum then return minimum
-        // because it will be successor of the key
-        else if (helper.minimum != -1 && key < helper.minimum) {
-            return helper.minimum;
-        }
-        else {
-
-            // Find successor inside the cluster of the key
-            // First find the maximum in the cluster
-            int max_incluster = FindMaximum(helper.clusters.get(helper.high(key)));
-            int offset;
-            int succ_cluster;
-
-            // If there is any key( maximum!=-1 ) present in
-            // the cluster then find the successor inside
-            // the cluster
-            if (max_incluster != -1 && helper.low(key) < max_incluster)
-            {
-                offset = FindSuccessor(helper.clusters.get(helper.high(key)), helper.low(key));
-
-                return helper.generate_index(helper.high(key), offset);
-            }
-            else {
-                succ_cluster = FindSuccessor(helper.summary, helper.high(key));
-                if (succ_cluster == -1) {
-                    return -1;
-                }
-                // Find minimum in successor cluster which
-                // will be the successor of the key
-                else {
-                    offset = FindMinimum(helper.clusters.get(succ_cluster));
-
-                    return helper.generate_index(succ_cluster, offset);
-                }
-            }
-        }
-    }
-    public static int FindPredecessor(Van_Emde_Boas helper, int key)
-    {
-        if (helper.universe_size == 2) {
-            if (key == 1 && helper.minimum == 0) {
-                return 0;
-            }
-            else {
-                return -1;
-            }
-        }
-        // If the key is greater than maximum of the tree
-        // then
-        // return key as it will be the predecessor of the
-        // key
-        else if (helper.maximum != -1 && key > helper.maximum) {
-            return helper.maximum;
-        }
-        else {
-            // Find predecessor in the cluster of the key
-            // First find minimum in the key to check
-            // whether any key is present in the cluster
-            int min_incluster =FindMinimum(helper.clusters.get(helper.high(key)));
-            int offset;
-            int pred_cluster;
-
-            // If any key is present in the cluster then
-            // find predecessor in the cluster
-            if (min_incluster != -1
-                    && helper.low(key) > min_incluster) {
-
-                offset = FindPredecessor(helper.clusters.get(helper.high(key)), helper.low(key));
-
-                return helper.generate_index(helper.high(key), offset);
-            }
-            else {
-                // returns the index of predecessor cluster
-                // with any key present
-                pred_cluster = FindPredecessor(helper.summary, helper.high(key));
-                // If no predecessor cluster then...
-                if (pred_cluster == -1) {
-                    if (helper.minimum != -1 && key > helper.minimum) {
-                        return helper.minimum;
-                    }
-                    else {
-                        return -1;
-                    }
-                } // Otherwise find maximum in the
-                // predecessor cluster
-                else {
-                    offset = FindMaximum(helper.clusters.get(pred_cluster));
-
-                    return helper.generate_index(pred_cluster, offset);
-                }
-            }
-        }
-    }
+    // Funkcja usuwająca klucz z drzewa
     public static void Delete(Van_Emde_Boas helper, int key)
     {
-        // If only one key is present, it means
-        // that it is the key we want to delete
+        // Jeśli tylko jeden klucz jest obecny, oznacza to, że jest to klucz, który chcemy usunąć
         if (helper.maximum == helper.minimum) {
 
             helper.minimum = -1;
             helper.maximum = -1;
         }
-        // Base case: If the above condition is not true
-        // i.e. the tree has more than two keys
-        // and if its size is two than a tree has exactly
-        // two keys.
+        // Bazowy przypadek: Jeśli powyższy warunek nie jest spełniony
+        // to oznacza, że drzewo ma więcej niż dwa klucze
         else if (helper.universe_size == 2) {
 
             if (key == 0) {
@@ -279,9 +87,8 @@ class Main {
             helper.maximum = helper.minimum;
         }
         else {
-            // As we are doing something similar to lazy
-            // propagation we will basically find next
-            // bigger key and assign it as minimum
+            // Ponieważ wykonujemy coś podobnego do leniwej propagacji,
+            // znajdziemy kolejny większy klucz i przypiszemy go jako minimum
             if (key == helper.minimum) {
 
                 int first_cluster = FindMinimum(helper.summary);
@@ -290,19 +97,17 @@ class Main {
                 helper.minimum = key;
             }
 
-            // Now we delete the key
+            // Teraz usuwamy klucz
             Delete(helper.clusters.get(helper.high(key)), helper.low(key));
 
-            // If the minimum in the cluster of the key is
-            // -1 then we have to delete it from the summary
-            // to eliminate the key completely
+            // Jeśli minimum w klastrze klucza jest równe -1, to musimy go usunąć z podsumowania,
+            // aby całkowicie usunąć klucz
             if (FindMinimum(
                     helper.clusters.get(helper.high(key))) == -1) {
 
                 Delete(helper.summary, helper.high(key));
 
-                // After the above condition, if the key
-                // is maximum of the tree then.
+                // Po powyższym warunku, jeśli klucz jest maksymalny w drzewie
                 if (key == helper.maximum) {
                     int max_insummary = FindMaximum(helper.summary);
 
@@ -310,32 +115,210 @@ class Main {
                         helper.maximum = helper.minimum;
                     }
                     else {
-                        // Assign global maximum of the
-                        // tree, after deleting our
-                        // query-key
+                        // Przypisz globalne maksimum drzewa po usunięciu klucza z zapytaniem
                         helper.maximum = helper.generate_index(max_insummary, FindMaximum(helper.clusters.get(max_insummary)));
                     }
                 }
             }
-            // Simply find the new maximum key and
-            // set the maximum of the tree
-            // to the new maximum
+            // Po prostu znajdź nowy maksymalny klucz i
+            // ustaw maksimum drzewa na nowe maksimum
             else if (key == helper.maximum) {
                 helper.maximum = helper.generate_index(helper.high(key), FindMaximum(helper.clusters.get(helper.high(key))));
             }
         }
     }
-    public static void DisplayMenu() {
-        System.out.println("Van Emde Boas Tree Operations:");
-        System.out.println("1. Insert a key");
-        System.out.println("2. Delete a key");
-        System.out.println("3. Check if a key exists");
-        System.out.println("4. Find predecessor of a key");
-        System.out.println("5. Find successor of a key");
-        System.out.println("6. Exit");
-        System.out.println("Enter your choice:");
+
+    // Funkcja do wstawiania klucza do drzewa
+    static void Insert(Van_Emde_Boas helper, int key)
+    {
+
+        // Jeśli w drzewie nie ma żadnego klucza,
+        // ustaw zarówno minimum, jak i maksimum na klucz
+        if (helper.minimum == -1) {
+            helper.minimum = key;
+            helper.maximum = key;
+        }
+        else {
+            // Jeśli klucz jest mniejszy niż obecne minimum,
+            // zamień go z obecnym minimum,
+            // ponieważ to minimum jest faktycznie
+            // minimum jednego z wewnętrznych klastrów
+            if (key < helper.minimum) {
+                int temp = helper.minimum;
+                helper.minimum = key;
+                key = temp;
+            }
+
+            // Nie bazowy przypadek...
+            if (helper.universe_size > 2) {
+
+                // Jeśli w klastrze nie ma żadnego klucza, to
+                // wstaw klucz zarówno do klastra, jak i do podsumowania
+                if (FindMinimum(helper.clusters.get(helper.high(key))) == -1) {
+                    Insert(helper.summary, helper.high(key));
+
+                    // Ustaw minimum i maksimum klastra na klucz,
+                    // ponieważ nie ma innych kluczy,
+                    // na tym poziomie zatrzymamy się
+                    helper.clusters.get(helper.high(key))
+                            .minimum
+                            = helper.low(key);
+                    helper.clusters.get(helper.high(key))
+                            .maximum
+                            = helper.low(key);
+                }
+                else {
+                    // Jeśli w drzewie są inne elementy,
+                    // rekurencyjnie przejdź głębiej
+                    // w strukturę, aby ustawić atrybuty
+                    // odpowiednio
+                    Insert(helper.clusters.get(helper.high(key)), helper.low(key));
+                }
+            }
+            // Ustaw klucz jako maksymalny, jeśli jest większy niż obecne maksimum
+            if (key > helper.maximum) {
+                helper.maximum = key;
+            }
+        }
     }
-    // Driver code
+
+    // Funkcja sprawdzająca, czy klucz istnieje w drzewie
+    public static boolean IsMember(Van_Emde_Boas helper,
+                                   int key)
+    {
+        if (helper.universe_size < key) {
+            return false;
+        }
+
+        if (helper.minimum == key || helper.maximum == key) {
+            return true;
+        }
+        else {
+            // Jeśli po spełnieniu powyższego warunku,
+            // a rozmiar drzewa wynosi 2, to obecny klucz
+            // musi być maksimum lub minimum drzewa
+            if (helper.universe_size == 2) {
+                return false;
+            }
+            else {
+                return IsMember(helper.clusters.get(helper.high(key)), helper.low(key));
+            }
+        }
+    }
+
+    // Funkcja do znajdowania następnika danego klucza
+    public static int FindSuccessor(Van_Emde_Boas helper,
+                                    int key)
+    {
+        if (helper.universe_size == 2) {
+            if (key == 0 && helper.maximum == 1) {
+                return 1;
+            }
+            else {
+                return -1;
+            }
+        }
+        // Jeśli klucz jest mniejszy niż minimum, zwróć minimum,
+        // ponieważ będzie to następca klucza
+        else if (helper.minimum != -1 && key < helper.minimum) {
+            return helper.minimum;
+        }
+        else {
+
+            // Znajdź następnika wewnątrz klastra klucza
+            // Najpierw znajdź maksimum w klastrze
+            int max_incluster = FindMaximum(helper.clusters.get(helper.high(key)));
+            int offset;
+            int succ_cluster;
+
+            // Jeśli w klastrze jest jakiś klucz (maximum != -1), znajdź następnika wewnątrz klastra
+            if (max_incluster != -1 && helper.low(key) < max_incluster)
+            {
+                offset = FindSuccessor(helper.clusters.get(helper.high(key)), helper.low(key));
+
+                return helper.generate_index(helper.high(key), offset);
+            }
+            else {
+                succ_cluster = FindSuccessor(helper.summary, helper.high(key));
+                if (succ_cluster == -1) {
+                    return -1;
+                }
+                // Znajdź minimum w następnym klastrze, które będzie następnikiem klucza
+                else {
+                    offset = FindMinimum(helper.clusters.get(succ_cluster));
+
+                    return helper.generate_index(succ_cluster, offset);
+                }
+            }
+        }
+    }
+
+    // Funkcja do znajdowania poprzednika danego klucza
+    public static int FindPredecessor(Van_Emde_Boas helper, int key)
+    {
+        if (helper.universe_size == 2) {
+            if (key == 1 && helper.minimum == 0) {
+                return 0;
+            }
+            else {
+                return -1;
+            }
+        }
+        // Jeśli klucz jest większy niż maksimum drzewa, zwróć klucz, ponieważ będzie to poprzednik klucza
+        else if (helper.maximum != -1 && key > helper.maximum) {
+            return helper.maximum;
+        }
+        else {
+            // Znajdź poprzednika wewnątrz klastra klucza
+            // Najpierw znajdź minimum w klastrze, aby sprawdzić,
+            // czy w klastrze jest obecny jakiś klucz
+            int min_incluster =FindMinimum(helper.clusters.get(helper.high(key)));
+            int offset;
+            int pred_cluster;
+
+            // Jeśli w klastrze jest obecny jakiś klucz, znajdź poprzednika wewnątrz klastra
+            if (min_incluster != -1
+                    && helper.low(key) > min_incluster) {
+
+                offset = FindPredecessor(helper.clusters.get(helper.high(key)), helper.low(key));
+
+                return helper.generate_index(helper.high(key), offset);
+            }
+            else {
+                // Zwraca indeks poprzedniego klastra z obecnym kluczem
+                // oznaczonym przez klucz
+                pred_cluster = FindPredecessor(helper.summary, helper.high(key));
+                // Jeśli nie ma poprzedniego klastra, to...
+                if (pred_cluster == -1) {
+                    if (helper.minimum != -1 && key > helper.minimum) {
+                        return helper.minimum;
+                    }
+                    else {
+                        return -1;
+                    }
+                } // W przeciwnym razie znajdź maksimum w poprzednim klastrze
+                else {
+                    offset = FindMaximum(helper.clusters.get(pred_cluster));
+
+                    return helper.generate_index(pred_cluster, offset);
+                }
+            }
+        }
+    }
+
+    // Funkcja wyświetlająca menu operacji na drzewie Van Emde Boasa
+    public static void DisplayMenu() {
+        System.out.println("Operacje na drzewie Van Emde Boasa:");
+        System.out.println("1. Wstaw klucz");
+        System.out.println("2. Usuń klucz");
+        System.out.println("3. Sprawdź, czy klucz istnieje");
+        System.out.println("4. Znajdź poprzednika klucza");
+        System.out.println("5. Znajdź następnika klucza");
+        System.out.println("6. Wyjdź");
+        System.out.println("Wprowadź swój wybór:");
+    }
+
+    // Funkcja główna
     public static void main(String[] args)
     {
         Scanner scanner = new Scanner(System.in);
@@ -349,55 +332,55 @@ class Main {
 
             switch (choice) {
                 case 1:
-                    System.out.println("Enter key to insert:");
+                    System.out.println("Wprowadź klucz do wstawienia:");
                     key = scanner.nextInt();
                     Insert(tree, key);
                     break;
                 case 2:
-                    System.out.println("Enter key to delete:");
+                    System.out.println("Wprowadź klucz do usunięcia:");
                     key = scanner.nextInt();
                     if (IsMember(tree, key)) {
                         Delete(tree, key);
-                        System.out.println("Key deleted successfully.");
+                        System.out.println("Klucz został pomyślnie usunięty.");
                     } else {
-                        System.out.println("Key not found.");
+                        System.out.println("Nie znaleziono klucza.");
                     }
                     break;
                 case 3:
-                    System.out.println("Enter key to check:");
+                    System.out.println("Wprowadź klucz do sprawdzenia:");
                     key = scanner.nextInt();
                     if (IsMember(tree, key)) {
-                        System.out.println("Key exists.");
+                        System.out.println("Klucz istnieje.");
                     } else {
-                        System.out.println("Key does not exist.");
+                        System.out.println("Klucz nie istnieje.");
                     }
                     break;
                 case 4:
-                    System.out.println("Enter key to find predecessor:");
+                    System.out.println("Wprowadź klucz, dla którego chcesz znaleźć poprzednika:");
                     key = scanner.nextInt();
                     int predecessor = FindPredecessor(tree, key);
                     if (predecessor != -1) {
-                        System.out.println("Predecessor of " + key + " is " + predecessor);
+                        System.out.println("Poprzednik klucza " + key + " to " + predecessor);
                     } else {
-                        System.out.println("Predecessor not found.");
+                        System.out.println("Nie znaleziono poprzednika.");
                     }
                     break;
                 case 5:
-                    System.out.println("Enter key to find successor:");
+                    System.out.println("Wprowadź klucz, dla którego chcesz znaleźć następnika:");
                     key = scanner.nextInt();
                     int successor = FindSuccessor(tree, key);
                     if (successor != -1) {
-                        System.out.println("Successor of " + key + " is " + successor);
+                        System.out.println("Następnik klucza " + key + " to " + successor);
                     } else {
-                        System.out.println("Successor not found.");
+                        System.out.println("Nie znaleziono następnika.");
                     }
                     break;
                 case 6:
-                    System.out.println("Exiting...");
+                    System.out.println("Zamykanie...");
                     break;
 
                 default:
-                    System.out.println("Invalid choice. Please try again.");
+                    System.out.println("Nieprawidłowy wybór. Spróbuj ponownie.");
             }
         } while (choice != 6);
 
